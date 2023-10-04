@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Email Signature Creator</title>
+  <style>
+    body {
+      font-family: sans-serif;
+    }
+    label {
+      display: inline-block;
+      width: 30%;
+      flex-shrink: 0;
+    }
+    p {
+      margin: 2em 1em;
+      display: flex;
+      align-items: center;
+    }
+    input {
+      padding: 12px 16px;
+      width: 100%;
+    }
+    button {
+      padding: 12px 16px;
+      margin: 0 0 0 calc(30% + 0.5em);
+    }
+  </style>
+</head>
+<body>
+  <form id="generate">
+    <p><strong>Форма генерации сигнатуры</strong></p>
+    <fieldset style="max-width: 600px; box-sizing: border-box; border: 1px solid">
+      <p>
+        <label for="name">Имя</label>
+        <input type="text" id="name" name="name">
+      </p>
+      <p>
+        <label for="role">Должность</label>
+        <input type="text" id="role" name="role">
+      </p>
+      <p>
+        <label for="email">E-mail</label>
+        <input type="text" id="email" name="email">
+      </p>
+      <p>
+        <label for="phone">Телефон</label>
+        <input type="text" id="phone" name="phone">
+      </p>
+      <p>
+        <label for="avatar">Ссылка на аватар</label>
+        <input type="text" id="avatar" name="avatar">
+      </p>
+      <p>
+        <label for="facebook">Facebook</label>
+        <input type="text" id="facebook" name="facebook">
+      </p>
+      <p>
+        <label for="linkedIn">LinkedIn</label>
+        <input type="text" id="linkedIn" name="linkedIn">
+      </p>
+      <p>
+        <label for="whatsapp">WhatsApp</label>
+        <input type="text" id="whatsapp" name="whatsapp">
+      </p>
+      <p>
+        <label for="telegram">Telegram</label>
+        <input type="text" id="telegram" name="telegram">
+      </p>
+      <p>
+        <label for="discord">Discord</label>
+        <input type="text" id="discord" name="discord">
+      </p>
+      <p>
+        <input type="radio" id="famesters" name="logotype" value="famesters">
+        <label for="famesters">Логотип Famesters</label><br>
+      </p>
+      <p>
+        <label for="discord">Сокращенная подпись (Имя, Должность, LinkedIn)</label>
+        <input type="checkbox" id="shortSignature" name="shortSignature">
+      </p>
+      <button type="submit">
+        Сгенерировать
+      </button>
+    </fieldset>
+    <br>
+    <p><strong>Результат</strong>&nbsp;(выделить полностью и скопировать)</p>
+    <div id="content" style="max-width: 600px; border: 1px solid;padding: 3em;box-sizing: border-box;">
+    </div>
+    
+    <p><strong>Исходный код</strong>&nbsp;(если почта поддерживает)</p>
+    <pre id="code" style="max-width: 600px; max-height: 220px; overflow: auto; border: 1px solid;padding: 1em;box-sizing: border-box;">
+
+    </pre>
+  </form>
+
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.3.0/lodash.js"></script>
+
+  <script type="text/template" id="signature-template">
+    <table style="width: 100%; border-spacing: 0;font-family: Arial, Helvetica, sans-serif;">
+      <tr>
+        <% if (avatar) { %>
+          <td style="padding: 10px; width: 5%; vertical-align: top;">
+            <img src="<%-avatar%>" alt="<%-name%>" width="51px" height="51px" style="border-radius: 26px; border: 2px solid #DDE0E4">
+          </td>
+        <% } %>
+        <td style="padding: 10px; width: 50%; vertical-align: top; border-right: 1px solid #e3e3e3;">
+          <table>
+            <tr style="height: 50px; vertical-align: top; text-align: left;">
+              <td>
+                <% if (name) { %>
+                  <div style="font-size: 18px; font-weight: bold; font-stretch: normal; font-style: normal; line-height: 1.43; color: #2a2a34; text-align: left; white-space: nowrap;"><%-name%></div>
+                <% } %>
+                <% if (role) { %>
+                  <div style="font-size: 14px; font-weight: normal; font-stretch: normal; font-style: normal; line-height: 1.82; color: #484B55; text-align: left; white-space: nowrap;"><%-role%></div>
+                <% } %>
+              </td>
+            </tr>
+            <tr style="height: 30px; vertical-align: top; text-align: left;">
+              <td>
+                <% if (email) { %>
+                  <a href="mailto:<%-email%>" style="font-size: 10px; text-decoration: none; color: #484B55; display:block;"><%-email%></a>
+                <% } %>
+                <% if (phone) { %>
+                  <a href="tel:<%-phone%>" style="font-size: 10px; text-decoration: none; color: #484B55; display:block; line-height: 1.82;"><%-phone%></a>
+                <% } %>
+              </td>
+            </tr>
+            <tr style="height: 20px; vertical-align: top; text-align: left;">
+              <td>
+                <% if (socials && socials.length > 0) { %>
+                  <div style="padding: 6px 0 0; line-height: 8px; font-size: 10px; font-weight: normal; font-stretch: normal; font-style: normal; color: #7E8087;">
+                    <% for (let key = 0; key < socials.length; key++) { %>
+                      <a href="<%-socials[key].value%>" target="_blank" style="padding: 1px; border-radius: 50%; border: 1px solid #7E8087; text-decoration: none; display: inline-block; width: 20px; height: 20px;">
+                        <img src="<%-socials[key].icon%>" alt="<%-socials[key].title%>" width="20px" height="20px" />
+                      </a>
+                    <% } %>
+                  </div>
+                <% } %>
+              </td>
+            </tr>
+          </table>
+        </td>
+        <td style="padding: 10px 20px; width: 45%; vertical-align: top;">
+          <table>
+            <tr style="height: 50px; vertical-align: top; text-align: left;">
+              <td>
+                <% if (logotype) { %>
+                  <img style="padding-top: 10px" width="<%-logotype.width%>" height="<%-logotype.height%>" src="<%-logotype.src%>" alt="<%-logotype.alt%>">
+                  <% } %>
+              </td>
+            </tr>
+            <tr style="height: 30px; vertical-align: top; text-align: left;">
+              <td>
+                <div style="font-size: 10px; font-stretch: normal; font-style: normal; line-height: 1.43; color: #484B55; text-align: left; white-space: nowrap;">84 Spyrou Kyprianou Avenue,</div>
+                <div style="font-size: 10px; font-stretch: normal; font-style: normal; line-height: 1.43; color: #484B55; text-align: left; white-space: nowrap;">Limassol, Cyprus 4004</div>
+              </td>
+            </tr>
+            <tr style="height: 20px; vertical-align: top; text-align: left;">
+              <td>
+                <a href="https://<%-site%>" target="_blank" style="font-size: 10px; text-decoration: none; color: #484B55; display:block; line-height: 1.82;"><%-site%></a>
+            </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </script>
+  <script type="text/template" id="signature-short-template">
+    <table style="width: 100%; border-spacing: 0;font-family: Arial, Helvetica, sans-serif;">
+      <tr style="height: 32px; vertical-align: middle; text-align: left;">
+          <% if (logotype) { %>
+            <td style="padding: 0 12px; text-align: right; border-right: 1px solid #e3e3e3; width: <%-logotype.width%>;">
+              <img width="<%-logotype.width%>" height="<%-logotype.height%>" src="<%-logotype.src%>" alt="<%-logotype.alt%>">
+            </td>
+          <% } %>
+          <td style="padding: 0 12px;">
+              <table style="border-spacing: 0;">
+              <tr>
+                  <td style="padding: 0;">
+                    <% if (name) { %>
+                      <div style="font-size: 10px; font-weight: bold; font-stretch: normal; font-style: normal; color: #2a2a34; text-align: left;"><%-name%></div>
+                    <% } %>
+                    <% if (role) { %>
+                      <div style="font-size: 11px; font-weight: normal; font-stretch: normal; font-style: normal; line-height: 1.4; color: #787782; text-align: left;"><%-role%></div>
+                    <% } %>
+                    <% if (socials && socials.length > 0) { %>
+                      <a href="<%-socials?.[0]?.value%>" target="_blank" style="padding-right: 6px;text-decoration: none; display: inline-block; width: 50px; height: 20px;">
+                        <img src="https://famesters.github.io/signature/static/linkedInFullGray.png" alt="Linked In" width="50px" />
+                      </a>
+                    <% } %>
+                  </td>
+              </tr>
+              </table>
+          </td>
+      </tr>
+    </table>
+  </script>
+
+  <script>
+    const form = document.getElementById('generate');
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const {
+        name,
+        role,
+        email,
+        avatar,
+        telegram,
+        facebook,
+        linkedIn,
+        whatsapp,
+        discord,
+        phone,
+        shortSignature,
+        logotype,
+        site,
+      } = form.elements;
+
+      const icons = {
+        telegram: 'https://famesters.github.io/signature/static/telegram@2x.png',
+        facebook: 'https://famesters.github.io/signature/static/facebook@2x.png',
+        linkedIn: 'https://famesters.github.io/signature/static/linkedIn@2x.png',
+        whatsapp: 'https://famesters.github.io/signature/static/whatsapp@2x.png',
+        discord: 'https://famesters.github.io/signature/static/discord@2x.png',
+      };
+
+      const data = {
+        name: name.value,
+        role: role.value,
+        email: email.value,
+        avatar: avatar.value,
+        phone: phone.value,
+        socials: [],
+      };
+
+      if (telegram.value) {
+        data.socials.push({
+          title: 'Telegram',
+          icon: icons.telegram,
+          value: telegram.value,
+        });
+      }
+
+      if (facebook.value) {
+        data.socials.push({
+          title: 'Facebook',
+          icon: icons.facebook,
+          value: facebook.value,
+        });
+      }
+
+      if (linkedIn.value) {
+        data.socials.push({
+          title: 'Linked In',
+          icon: icons.linkedIn,
+          value: linkedIn.value,
+        });
+      }
+
+      if (whatsapp.value) {
+        data.socials.push({
+          title: 'WhatsApp',
+          icon: icons.whatsapp,
+          value: whatsapp.value,
+        });
+      }
+
+      if (discord.value) {
+        data.socials.push({
+          title: 'Discord',
+          icon: icons.discord,
+          value: discord.value,
+        });
+      }
+      
+      if (logotype.value === 'famesters') {
+        data.logotype = {
+          width: '72px',
+          height: '31px',
+          src: 'https://famesters.github.io/signature/static/famesters.png',
+          alt: 'Famesters',
+        }
+        data.site = 'famesters.com'
+      }
+      
+
+      let html = document.getElementById('signature-template').innerHTML;
+      if (shortSignature.checked) {
+        html = document.getElementById('signature-short-template').innerHTML;
+        data.socials = [];
+        if (linkedIn.value) {
+          data.socials.push({
+            title: 'Linked In',
+            value: linkedIn.value,
+          });
+        }
+      }
+      const tmpl = _.template(html);
+      const str = tmpl(data);
+      document.getElementById('content').innerHTML = str;
+      document.getElementById('code').innerText = str;
+    });
+  </script>
+</body>
+</html>
